@@ -38,7 +38,7 @@ export default function LoginPage() {
           </div>
           <div>
             <div className="font-bold text-[17px] text-ink">포오랩</div>
-            <div className="text-xs text-ink-3">사내 공유 시스템</div>
+            <div className="text-xs text-ink-3">Four-O LAB · 사내 공유 시스템</div>
           </div>
         </div>
 

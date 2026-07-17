@@ -49,7 +49,7 @@ export default function Sidebar({
         </div>
         <div>
           <div className="font-bold text-[15px] leading-tight">포오랩</div>
-          <div className="text-[11px] text-ink-3">사내 공유 시스템</div>
+          <div className="text-[11px] text-ink-3">Four-O LAB</div>
         </div>
       </div>
 
