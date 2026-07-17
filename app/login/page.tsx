@@ -17,11 +17,18 @@ export default function LoginPage() {
     setErr("");
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithPassword({
-      email,
+      email: email.trim().toLowerCase(),
       password: pw,
     });
     if (error) {
-      setErr("로그인에 실패했습니다. 이메일과 비밀번호를 확인하세요.");
+      const m = error.message || "";
+      if (m.includes("Invalid login credentials"))
+        setErr("이메일 또는 비밀번호가 일치하지 않습니다. (관리자에게 계정 확인 요청)");
+      else if (m.includes("Email not confirmed"))
+        setErr("이메일 미인증 계정입니다. 관리자에게 'Auto Confirm' 재발급을 요청하세요.");
+      else if (m.toLowerCase().includes("fetch") || m.toLowerCase().includes("network"))
+        setErr("서버 연결에 실패했습니다. 인터넷 연결을 확인하세요.");
+      else setErr(`로그인 실패: ${m}`);
       setLoading(false);
       return;
     }
@@ -55,7 +62,10 @@ export default function LoginPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="name@pohlab.com"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              placeholder="name@fourolab.com"
               className="h-10 px-3 rounded-lg border border-line bg-surface-2 text-[14px] outline-none focus:border-accent focus:ring-2 focus:ring-accent-bg"
             />
           </label>
