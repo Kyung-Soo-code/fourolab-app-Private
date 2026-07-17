@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #eef1f4;
+  --surface: #ffffff;
+  --surface-2: #f6f8fa;
+  --ink: #16212c;
+  --ink-2: #45566280;
+  --ink-2: #455662;
+  --ink-3: #7a8894;
+  --line: #dde3e9;
+  --line-2: #eaeef1;
+  --accent: #0c8478;
+  --accent-2: #0a6f65;
+  --accent-bg: #e0f2ef;
+  --accent-ink: #08544a;
+  --ok-bg: #e4f3e8;
+  --ok-ink: #1c5e33;
+  --warn-bg: #faeed7;
+  --warn-ink: #7a4d0c;
+  --crit-bg: #fae7e6;
+  --crit-ink: #87231f;
+  --info-bg: #e2edf8;
+  --info-ink: #1a4879;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
+  --color-accent-bg: var(--accent-bg);
+  --color-accent-ink: var(--accent-ink);
+  --font-sans: "Pretendard", "Pretendard Variable", -apple-system,
+    "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", system-ui, sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
