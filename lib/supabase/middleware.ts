@@ -54,7 +54,11 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    if (isDealer && !path.startsWith("/aftercare")) {
+    if (
+      isDealer &&
+      !path.startsWith("/aftercare") &&
+      !path.startsWith("/help")
+    ) {
       const url = request.nextUrl.clone();
       url.pathname = "/aftercare";
       return NextResponse.redirect(url);

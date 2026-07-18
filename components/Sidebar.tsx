@@ -16,6 +16,7 @@ const NAV = [
   { href: "/inventory", label: "재고·생산" },
   { href: "/schedule", label: "전시·일정" },
   { href: "/audit", label: "수정 이력" },
+  { href: "/help", label: "사용 안내" },
 ];
 
 export default function Sidebar({
@@ -28,10 +29,10 @@ export default function Sidebar({
   const pathname = usePathname();
   const router = useRouter();
 
-  // 대리점 계정은 사후관리만 노출
+  // 대리점 계정은 사후관리·사용 안내만 노출
   const nav =
     role === "dealer"
-      ? NAV.filter((n) => n.href === "/aftercare")
+      ? NAV.filter((n) => n.href === "/aftercare" || n.href === "/help")
       : NAV;
 
   async function logout() {

@@ -23,6 +23,7 @@ const ALL = [
   { href: "/inventory", label: "재고·생산" },
   { href: "/schedule", label: "전시·일정" },
   { href: "/audit", label: "수정 이력" },
+  { href: "/help", label: "사용 안내" },
 ];
 
 export default function MobileTabs({ role = "staff" }: { role?: string }) {
@@ -38,6 +39,12 @@ export default function MobileTabs({ role = "staff" }: { role?: string }) {
           className="text-[12px] font-bold text-accent-ink px-6 py-1.5 rounded-lg bg-accent-bg"
         >
           대리점 사후관리
+        </Link>
+        <Link
+          href="/help"
+          className="text-[12px] font-bold text-ink-3 px-6 py-1.5 rounded-lg"
+        >
+          사용 안내
         </Link>
       </nav>
     );
