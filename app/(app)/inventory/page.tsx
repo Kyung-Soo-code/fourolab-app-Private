@@ -54,6 +54,51 @@ async function createPart(formData: FormData) {
   revalidatePath("/inventory");
 }
 
+// 완성품 제작 → 해당 모델 BOM(1기당 소요) × 대수만큼 부품 재고 일괄 차감
+async function produceUnits(formData: FormData) {
+  "use server";
+  const supabase = await createClient();
+  const model = String(formData.get("model") || "OS2"); // OS1 / OS2
+  const qty = Math.max(1, n(formData.get("qty")) || 1);
+  const serial = String(formData.get("serial") || "").trim();
+
+  const { data: bomRaw } = await supabase
+    .from("parts")
+    .select("id, name, per_unit, stock, model")
+    .gt("per_unit", 0);
+  const bom = ((bomRaw ?? []) as any[]).filter(
+    (p) => p.model === model || (p.model ?? "공용") === "공용",
+  );
+
+  for (const p of bom) {
+    const need = (p.per_unit ?? 0) * qty;
+    await supabase
+      .from("parts")
+      .update({ stock: Math.max(0, (p.stock ?? 0) - need) })
+      .eq("id", p.id);
+  }
+
+  // 고유번호를 적었으면 완성품 기기로 자동 등록
+  if (serial) {
+    await supabase.from("devices").insert({
+      serial,
+      model,
+      category: "완성품",
+      status: "제작 완료",
+      produced_at: new Date().toISOString().slice(0, 10),
+    });
+  }
+
+  await logAudit(
+    "등록",
+    "제작",
+    `${model === "OS1" ? "OCTA-SELL 1" : "OCTA-SELL 2"} ${qty}대 제작 · 부품 ${bom.length}종 차감${serial ? ` · ${serial}` : ""}`,
+  );
+  revalidatePath("/inventory");
+  revalidatePath("/devices");
+  revalidatePath("/fleet");
+}
+
 // 불량 / 재고 로스 기록 → 재고 차감
 async function addIssue(formData: FormData) {
   "use server";
@@ -373,6 +418,48 @@ export default async function InventoryPage({
             불량 {defectQty} / 입고 {arrivedQty} · 로스 {lossQty}
           </div>
         </div>
+      </div>
+
+      {/* 완성품 제작 → BOM 일괄 차감 */}
+      <div className="bg-surface border border-line rounded-xl p-4 mb-5">
+        <div className="flex items-center gap-2 mb-1">
+          <h2 className="font-bold text-[14px]">완성품 제작 (부품 일괄 차감)</h2>
+        </div>
+        <p className="text-[12px] text-ink-3 mb-3">
+          제작한 대수만큼 해당 모델(+공용) 부품이 1기당 소요량 × 대수로 한 번에
+          차감됩니다. 소요량 0인 부품(호스류 등)은 차감되지 않으니 필요 시 수동
+          조정하세요. 고유번호를 적으면 완성품 기기로도 자동 등록됩니다.
+        </p>
+        <form action={produceUnits} className="flex flex-wrap items-end gap-2.5">
+          <div>
+            <label className={labelCls}>모델</label>
+            <select name="model" className={inputCls + " w-40"} defaultValue="OS2">
+              <option value="OS2">OCTA-SELL 2</option>
+              <option value="OS1">OCTA-SELL 1</option>
+            </select>
+          </div>
+          <div>
+            <label className={labelCls}>제작 대수</label>
+            <input
+              name="qty"
+              type="number"
+              min={1}
+              defaultValue={1}
+              className={inputCls + " w-24"}
+            />
+          </div>
+          <div className="flex-1 min-w-[180px]">
+            <label className={labelCls}>기기 고유번호 (선택)</label>
+            <input
+              name="serial"
+              className={inputCls}
+              placeholder="OS2-2607-031 (적으면 기기 자동 등록)"
+            />
+          </div>
+          <button className="h-9 px-5 rounded-lg bg-accent text-white font-semibold text-[13px] hover:bg-accent-2">
+            제작 완료 · 재고 차감
+          </button>
+        </form>
       </div>
 
       <div className="grid lg:grid-cols-[1.7fr_1fr] gap-4">
