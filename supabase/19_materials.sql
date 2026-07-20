@@ -8,6 +8,14 @@ alter table public.parts add column if not exists category text default '';
 alter table public.parts add column if not exists note text default '';
 alter table public.parts add column if not exists unit text default '개';
 
+-- 1.5) 기존 중복 부품 정리 (같은 이름+모델+분류 → 하나만 남김)
+delete from public.parts a
+using public.parts b
+where a.name = b.name
+  and coalesce(a.model,'') = coalesce(b.model,'')
+  and coalesce(a.category,'') = coalesce(b.category,'')
+  and a.ctid > b.ctid;
+
 -- 2) 유니크 제약을 (이름+모델+분류) 로 변경 (분류 다른 동명 부품 허용)
 drop index if exists parts_name_model_uniq;
 create unique index if not exists parts_name_model_cat_uniq
