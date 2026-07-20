@@ -147,7 +147,7 @@ export default async function AsPage() {
         .order("serial"),
       supabase
         .from("parts")
-        .select("id, name, model, favorite, as_type, stock")
+        .select("id, name, model, favorite, as_type, stock, note, category")
         .order("name"),
     ]);
 

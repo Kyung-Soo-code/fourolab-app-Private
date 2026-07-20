@@ -71,12 +71,12 @@ export async function GET(
     const { data } = await supabase.from("parts").select("*").order("name");
     csv = toCsv(
       [
-        "부품명", "모델", "구매처", "단가", "1기당소요", "현재고",
-        "1층", "2층", "3층", "공구함", "A/S구분", "즐겨찾기", "구매링크",
+        "부품명", "분류", "모델", "비고", "단위", "구매처", "단가",
+        "1기당소요", "현재고", "공구함", "A/S구분", "즐겨찾기", "구매링크",
       ],
       ((data ?? []) as any[]).map((p) => [
-        p.name, p.model, p.vendor, p.price, p.per_unit, p.stock,
-        p.floor1, p.floor2, p.floor3, p.toolbox, p.as_type,
+        p.name, p.category, p.model, p.note, p.unit, p.vendor, p.price,
+        p.per_unit, p.stock, p.toolbox, p.as_type,
         p.favorite ? "★" : "", p.buy_url,
       ]),
     );

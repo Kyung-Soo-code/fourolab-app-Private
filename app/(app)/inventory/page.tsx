@@ -45,6 +45,9 @@ async function createPart(formData: FormData) {
     floor3: n(formData.get("floor3")),
     toolbox: n(formData.get("toolbox")),
     as_type: String(formData.get("as_type") || ""),
+    category: String(formData.get("category") || ""),
+    note: String(formData.get("note") || ""),
+    unit: String(formData.get("unit") || "개"),
     favorite: formData.get("favorite") === "on",
   });
   await logAudit("등록", "부품", name);
@@ -154,20 +157,33 @@ async function toggleFavorite(formData: FormData) {
 export default async function InventoryPage({
   searchParams,
 }: {
-  searchParams: Promise<{ model?: string; sort?: string; filt?: string }>;
+  searchParams: Promise<{
+    model?: string;
+    sort?: string;
+    filt?: string;
+    cat?: string;
+  }>;
 }) {
   const sp = await searchParams;
   const model = sp.model ?? "all";
   const sort = sp.sort ?? "name";
   const filt = sp.filt ?? "all";
-  const qs = (over: { model?: string; sort?: string; filt?: string }) => {
+  const cat = sp.cat ?? "all";
+  const qs = (over: {
+    model?: string;
+    sort?: string;
+    filt?: string;
+    cat?: string;
+  }) => {
     const p = new URLSearchParams();
     const m = over.model ?? model;
     const s = over.sort ?? sort;
     const f = over.filt ?? filt;
+    const c = over.cat ?? cat;
     if (m && m !== "all") p.set("model", m);
     if (s && s !== "name") p.set("sort", s);
     if (f && f !== "all") p.set("filt", f);
+    if (c && c !== "all") p.set("cat", c);
     const str = p.toString();
     return "/inventory" + (str ? "?" + str : "");
   };
@@ -228,7 +244,21 @@ export default async function InventoryPage({
   const shortParts = parts.filter(isShort);
 
   // 필터
+  // 분류 목록 (등록된 부품에서 자동 수집)
+  const CAT_ORDER = [
+    "1단", "2단", "3단", "소독조", "소독조 피팅류", "뚜껑", "PCB판", "케이스",
+    "피팅류", "PP부품류", "신주 니플류", "PVC 니플류", "호스류", "패널류", "기타",
+  ];
+  const cats = Array.from(
+    new Set(parts.map((p) => p.category).filter(Boolean)),
+  ).sort((a, b) => {
+    const ia = CAT_ORDER.indexOf(a);
+    const ib = CAT_ORDER.indexOf(b);
+    return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || a.localeCompare(b, "ko");
+  });
+
   let view = parts.filter((p) => {
+    if (cat !== "all" && (p.category || "") !== cat) return false;
     if (filt === "fav") return !!p.favorite;
     if (filt === "as") return !!p.as_type;
     if (filt === "short") return isShort(p);
@@ -393,6 +423,38 @@ export default async function InventoryPage({
             ))}
           </div>
 
+          {/* 분류 필터 */}
+          {cats.length > 0 && (
+            <div className="px-4 py-2.5 border-b border-line-2 flex flex-wrap items-center gap-1.5">
+              <span className="text-[11.5px] text-ink-3 font-bold mr-1">분류</span>
+              <Link
+                href={qs({ cat: "all" })}
+                className={
+                  "px-2.5 py-1 rounded-md text-[12px] font-semibold border " +
+                  (cat === "all"
+                    ? "bg-accent-bg border-accent text-accent-ink"
+                    : "bg-surface border-line text-ink-2 hover:bg-surface-2")
+                }
+              >
+                전체
+              </Link>
+              {cats.map((c) => (
+                <Link
+                  key={c}
+                  href={qs({ cat: c })}
+                  className={
+                    "px-2.5 py-1 rounded-md text-[12px] font-semibold border " +
+                    (cat === c
+                      ? "bg-accent-bg border-accent text-accent-ink"
+                      : "bg-surface border-line text-ink-2 hover:bg-surface-2")
+                  }
+                >
+                  {c}
+                </Link>
+              ))}
+            </div>
+          )}
+
           <details className="border-b border-line-2">
             <summary className="px-4 py-2.5 text-[12.5px] font-semibold text-accent cursor-pointer select-none">
               부족품 구매링크 모음 ({shortParts.length})
@@ -433,10 +495,10 @@ export default async function InventoryPage({
                 <tr className="text-ink-3 text-left">
                   <th className="font-semibold px-2 py-2.5"></th>
                   <th className="font-semibold px-2 py-2.5">부품명</th>
+                  <th className="font-semibold px-2 py-2.5">분류</th>
                   <th className="font-semibold px-2 py-2.5">구매처</th>
                   <th className="font-semibold px-2 py-2.5">1기당</th>
                   <th className="font-semibold px-2 py-2.5">현재고</th>
-                  <th className="font-semibold px-2 py-2.5">층별(1·2·3)</th>
                   <th className="font-semibold px-2 py-2.5">공구함</th>
                   <th className="font-semibold px-2 py-2.5 text-right">관리</th>
                 </tr>
@@ -474,10 +536,24 @@ export default async function InventoryPage({
                             {modelLabel(p.model)}
                           </span>
                         </div>
+                        {p.note && (
+                          <div className="text-[11px] text-accent-ink">
+                            {p.note}
+                          </div>
+                        )}
                         {p.as_type && (
                           <div className="text-[11px] text-ink-3">
                             {p.as_type}
                           </div>
+                        )}
+                      </td>
+                      <td className="px-2 py-2.5">
+                        {p.category ? (
+                          <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded bg-surface-2 border border-line text-ink-2 whitespace-nowrap">
+                            {p.category}
+                          </span>
+                        ) : (
+                          <span className="text-ink-3 text-[11px]">—</span>
                         )}
                       </td>
                       <td className="px-2 py-2.5 text-ink-2">
@@ -503,9 +579,12 @@ export default async function InventoryPage({
                         }
                       >
                         {p.stock}
-                      </td>
-                      <td className="px-2 py-2.5 tabular-nums text-ink-2">
-                        {p.floor1} · {p.floor2} · {p.floor3}
+                        {p.unit && p.unit !== "개" && (
+                          <span className="text-[10.5px] text-ink-3 font-normal">
+                            {" "}
+                            {p.unit}
+                          </span>
+                        )}
                       </td>
                       <td className="px-2 py-2.5 tabular-nums text-ink-2">
                         {p.toolbox}
@@ -561,6 +640,29 @@ export default async function InventoryPage({
                   <option>정기점검</option>
                 </select>
               </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className={labelCls}>분류</label>
+                <input
+                  name="category"
+                  className={inputCls}
+                  list="catList"
+                  placeholder="피팅류"
+                />
+              </div>
+              <div>
+                <label className={labelCls}>단위</label>
+                <input name="unit" className={inputCls} defaultValue="개" list="unitList" />
+              </div>
+            </div>
+            <div>
+              <label className={labelCls}>비고 (자재 설명)</label>
+              <input
+                name="note"
+                className={inputCls}
+                placeholder="예: 급수모터 T피팅"
+              />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -819,6 +921,19 @@ export default async function InventoryPage({
           </form>
         </div>
       </div>
+
+      <datalist id="catList">
+        {CAT_ORDER.map((c) => (
+          <option key={c} value={c} />
+        ))}
+      </datalist>
+      <datalist id="unitList">
+        <option value="개" />
+        <option value="cm" />
+        <option value="m" />
+        <option value="set" />
+        <option value="포" />
+      </datalist>
     </div>
   );
 }

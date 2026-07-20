@@ -72,6 +72,9 @@ export default async function EditPartPage({
         floor3: n(formData.get("floor3")),
         toolbox: n(formData.get("toolbox")),
         as_type: String(formData.get("as_type") || ""),
+        category: String(formData.get("category") || ""),
+        note: String(formData.get("note") || ""),
+        unit: String(formData.get("unit") || "개"),
         favorite: formData.get("favorite") === "on",
         docs: parseJson(formData.get("docs")),
       })
@@ -143,6 +146,44 @@ export default async function EditPartPage({
             </select>
           </div>
         </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className={labelCls}>분류</label>
+            <input
+              name="category"
+              defaultValue={p.category ?? ""}
+              className={inputCls}
+              list="catList"
+              placeholder="피팅류"
+            />
+          </div>
+          <div>
+            <label className={labelCls}>단위</label>
+            <input
+              name="unit"
+              defaultValue={p.unit ?? "개"}
+              className={inputCls}
+            />
+          </div>
+        </div>
+        <div>
+          <label className={labelCls}>비고 (자재 설명)</label>
+          <input
+            name="note"
+            defaultValue={p.note ?? ""}
+            className={inputCls}
+            placeholder="예: 급수모터 T피팅"
+          />
+        </div>
+        <datalist id="catList">
+          {[
+            "1단", "2단", "3단", "소독조", "소독조 피팅류", "뚜껑", "PCB판",
+            "케이스", "피팅류", "PP부품류", "신주 니플류", "PVC 니플류",
+            "호스류", "패널류", "기타",
+          ].map((c) => (
+            <option key={c} value={c} />
+          ))}
+        </datalist>
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className={labelCls}>구매처</label>

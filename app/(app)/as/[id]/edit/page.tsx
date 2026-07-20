@@ -39,7 +39,7 @@ export default async function EditAsPage({
     supabase.from("as_tickets").select("*").eq("id", id).single(),
     supabase
       .from("parts")
-      .select("id, name, model, favorite, as_type, stock")
+      .select("id, name, model, favorite, as_type, stock, note, category")
       .order("name"),
   ]);
 

@@ -9,6 +9,8 @@ export type Part = {
   favorite: boolean;
   as_type?: string | null;
   stock?: number | null;
+  note?: string | null;
+  category?: string | null;
 };
 
 type Sel = { id: string; name: string; qty: number };
@@ -150,8 +152,13 @@ export default function PartPicker({
                     <span className="text-[13px] font-medium truncate">
                       {p.name}
                     </span>
+                    {p.note && (
+                      <span className="text-[10.5px] text-ink-3 truncate max-w-[120px]">
+                        {p.note}
+                      </span>
+                    )}
                     <span className="text-[10.5px] text-ink-3 shrink-0">
-                      {modelLabel(p.model)}
+                      {p.category || modelLabel(p.model)}
                     </span>
                   </button>
 
