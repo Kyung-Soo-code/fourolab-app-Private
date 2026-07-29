@@ -17,6 +17,7 @@ const ALL = [
   { href: "/as", label: "A/S 관리" },
   { href: "/devices", label: "기기 등록" },
   { href: "/fleet", label: "기기 현황" },
+  { href: "/checklist", label: "납품 체크리스트" },
   { href: "/hospitals", label: "병원 관리" },
   { href: "/dealers", label: "대리점 관리" },
   { href: "/aftercare", label: "대리점 사후관리" },
