@@ -10,12 +10,13 @@ export default function LoginPage() {
   const [pw, setPw] = useState("");
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
+  const [keep, setKeep] = useState(true);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setErr("");
-    const supabase = createClient();
+    const supabase = createClient(keep);
     const { error } = await supabase.auth.signInWithPassword({
       email: email.trim().toLowerCase(),
       password: pw,
@@ -79,6 +80,22 @@ export default function LoginPage() {
               onChange={(e) => setPw(e.target.value)}
               className="h-10 px-3 rounded-lg border border-line bg-surface-2 text-[14px] outline-none focus:border-accent focus:ring-2 focus:ring-accent-bg"
             />
+          </label>
+
+          <label className="flex items-start gap-2 text-[13px] text-ink-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={keep}
+              onChange={(e) => setKeep(e.target.checked)}
+              className="w-4 h-4 mt-0.5"
+            />
+            <span>
+              이 기기에서 로그인 유지 (30일)
+              <span className="block text-[11.5px] text-ink-3">
+                공용 컴퓨터라면 체크를 해제하세요 — 브라우저를 닫으면
+                로그아웃됩니다.
+              </span>
+            </span>
           </label>
 
           {err && (
