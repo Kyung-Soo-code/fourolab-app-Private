@@ -34,6 +34,20 @@ async function createChecklist(formData: FormData) {
   if (data?.id) redirect(`/checklist/${data.id}`);
 }
 
+async function deleteChecklist(formData: FormData) {
+  "use server";
+  const supabase = await createClient();
+  const id = String(formData.get("id"));
+  const { data: c } = await supabase
+    .from("checklists")
+    .select("serial")
+    .eq("id", id)
+    .maybeSingle();
+  await supabase.from("checklists").delete().eq("id", id);
+  await logAudit("삭제", "체크리스트", c?.serial ?? id);
+  revalidatePath("/checklist");
+}
+
 export default async function ChecklistPage() {
   const supabase = await createClient();
   const [{ data: listRaw }, { data: devRaw }] = await Promise.all([
@@ -65,15 +79,14 @@ export default async function ChecklistPage() {
               const pct = Math.round((done / total) * 100);
               const confirmed = c.status === "확정";
               return (
-                <Link
-                  key={c.id}
-                  href={`/checklist/${c.id}`}
-                  className="block px-4 py-3 hover:bg-surface-2"
-                >
+                <div key={c.id} className="px-4 py-3 hover:bg-surface-2">
                   <div className="flex items-center gap-2.5 flex-wrap">
-                    <span className="font-mono text-[12.5px] font-semibold">
+                    <Link
+                      href={`/checklist/${c.id}`}
+                      className="font-mono text-[12.5px] font-semibold hover:text-accent hover:underline"
+                    >
                       {c.serial || "번호 미입력"}
-                    </span>
+                    </Link>
                     <span className="text-[11.5px] font-semibold px-2 py-0.5 rounded-full bg-surface-2 border border-line text-ink-2">
                       {c.model === "OS1" ? "OCTA-SELL 1" : "OCTA-SELL 2"}
                     </span>
@@ -112,11 +125,25 @@ export default async function ChecklistPage() {
                       {done}/{total}
                     </span>
                   </div>
-                  <div className="text-[11.5px] text-ink-3 mt-1.5">
-                    확인 1: {c.checker1_name || "—"} · 확인 2:{" "}
-                    {c.checker2_name || "—"}
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <span className="text-[11.5px] text-ink-3">
+                      확인 1: {c.checker1_name || "—"} · 확인 2:{" "}
+                      {c.checker2_name || "—"}
+                    </span>
+                    <Link
+                      href={`/checklist/${c.id}`}
+                      className="ml-auto text-[12px] font-semibold text-accent hover:underline"
+                    >
+                      열기
+                    </Link>
+                    <form action={deleteChecklist}>
+                      <input type="hidden" name="id" value={c.id} />
+                      <button className="text-[12px] text-ink-3 hover:text-[color:var(--crit-ink)]">
+                        삭제
+                      </button>
+                    </form>
                   </div>
-                </Link>
+                </div>
               );
             })}
             {list.length === 0 && (

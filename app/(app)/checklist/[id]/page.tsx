@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { logAudit } from "@/lib/audit";
 import { CHECKLIST, ALL_KEYS, filledCount } from "@/lib/checklistItems";
@@ -77,6 +78,43 @@ export default async function ChecklistDetail({
       .eq("id", id);
     revalidatePath(`/checklist/${id}`);
     revalidatePath("/checklist");
+  }
+
+  // 기본정보 수정
+  async function updateInfo(formData: FormData) {
+    "use server";
+    const supabase = await createClient();
+    await supabase
+      .from("checklists")
+      .update({
+        serial: String(formData.get("serial") || "").trim(),
+        model: String(formData.get("model") || "OS2"),
+        purpose: String(formData.get("purpose") || "납품용"),
+        hospital: String(formData.get("hospital") || ""),
+      })
+      .eq("id", id);
+    await logAudit(
+      "수정",
+      "체크리스트",
+      `${String(formData.get("serial") || "")} 기본정보 수정`,
+    );
+    revalidatePath(`/checklist/${id}`);
+    revalidatePath("/checklist");
+  }
+
+  // 삭제
+  async function remove() {
+    "use server";
+    const supabase = await createClient();
+    const { data: cur } = await supabase
+      .from("checklists")
+      .select("serial")
+      .eq("id", id)
+      .maybeSingle();
+    await supabase.from("checklists").delete().eq("id", id);
+    await logAudit("삭제", "체크리스트", cur?.serial ?? id);
+    revalidatePath("/checklist");
+    redirect("/checklist");
   }
 
   // 확인 서명 (더블 체크)
@@ -170,7 +208,7 @@ export default async function ChecklistDetail({
         ← 체크리스트 목록
       </Link>
 
-      <div className="flex items-center gap-3 mt-2 mb-1 flex-wrap">
+      <div className="flex items-center gap-3 mt-2 mb-3 flex-wrap">
         <h1 className="text-xl font-bold font-mono">{c.serial}</h1>
         <span className="text-[12px] font-semibold px-2 py-0.5 rounded-full bg-surface-2 border border-line text-ink-2">
           {c.model === "OS1" ? "OCTA-SELL 1" : "OCTA-SELL 2"}
@@ -189,6 +227,68 @@ export default async function ChecklistDetail({
           <span className="text-[13px] text-ink-2">{c.hospital}</span>
         )}
       </div>
+
+      {/* 기본정보 수정 · 삭제 */}
+      <details className="bg-surface border border-line rounded-xl mb-4">
+        <summary className="px-4 py-2.5 text-[12.5px] font-semibold text-accent cursor-pointer select-none">
+          기본정보 수정 · 삭제
+        </summary>
+        <div className="px-4 pb-4">
+          <form action={updateInfo} className="flex flex-wrap items-end gap-2.5">
+            <div className="flex-1 min-w-[130px]">
+              <label className="text-[12px] font-semibold text-ink-2 mb-1 block">
+                장비번호
+              </label>
+              <input name="serial" defaultValue={c.serial ?? ""} className={inputCls} />
+            </div>
+            <div>
+              <label className="text-[12px] font-semibold text-ink-2 mb-1 block">
+                모델
+              </label>
+              <select
+                name="model"
+                defaultValue={c.model ?? "OS2"}
+                className={inputCls + " w-32"}
+              >
+                <option value="OS2">OCTA-SELL 2</option>
+                <option value="OS1">OCTA-SELL 1</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-[12px] font-semibold text-ink-2 mb-1 block">
+                구분
+              </label>
+              <select
+                name="purpose"
+                defaultValue={c.purpose ?? "납품용"}
+                className={inputCls + " w-24"}
+              >
+                <option>납품용</option>
+                <option>데모용</option>
+              </select>
+            </div>
+            <div className="flex-1 min-w-[130px]">
+              <label className="text-[12px] font-semibold text-ink-2 mb-1 block">
+                납품처 / 데모처
+              </label>
+              <input
+                name="hospital"
+                defaultValue={c.hospital ?? ""}
+                className={inputCls}
+              />
+            </div>
+            <button className="h-8 px-4 rounded-lg bg-accent text-white font-semibold text-[12.5px] hover:bg-accent-2">
+              정보 저장
+            </button>
+          </form>
+
+          <form action={remove} className="mt-3 pt-3 border-t border-line-2">
+            <button className="h-8 px-4 rounded-lg border border-line text-[12.5px] text-[color:var(--crit-ink)] hover:bg-[color:var(--crit-bg)]">
+              이 체크리스트 삭제
+            </button>
+          </form>
+        </div>
+      </details>
 
       {/* 진행률 + 더블 체크 상태 */}
       <div className="bg-surface border border-line rounded-xl p-4 mb-4">
