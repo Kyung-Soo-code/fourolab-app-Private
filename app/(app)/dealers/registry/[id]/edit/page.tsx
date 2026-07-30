@@ -50,6 +50,10 @@ export default async function EditDealer({
       .update({
         name: String(formData.get("name") || "").trim(),
         region: String(formData.get("region") || ""),
+        addr: String(formData.get("addr") || ""),
+        tel: String(formData.get("tel") || ""),
+        fax: String(formData.get("fax") || ""),
+        email: String(formData.get("email") || ""),
         contacts: parseJson(formData.get("contacts")),
         note: String(formData.get("note") || ""),
       })
@@ -86,6 +90,24 @@ export default async function EditDealer({
             <label className={labelCls}>지역</label>
             <input name="region" defaultValue={d.region ?? ""} className={inputCls} />
           </div>
+        </div>
+        <div>
+          <label className={labelCls}>주소</label>
+          <input name="addr" defaultValue={d.addr ?? ""} className={inputCls} />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className={labelCls}>대표번호</label>
+            <input name="tel" defaultValue={d.tel ?? ""} className={inputCls} />
+          </div>
+          <div>
+            <label className={labelCls}>팩스</label>
+            <input name="fax" defaultValue={d.fax ?? ""} className={inputCls} />
+          </div>
+        </div>
+        <div>
+          <label className={labelCls}>이메일</label>
+          <input name="email" defaultValue={d.email ?? ""} className={inputCls} />
         </div>
         <div>
           <label className={labelCls}>담당자 (여러 명 · 변경 가능)</label>

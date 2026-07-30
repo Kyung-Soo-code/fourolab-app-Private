@@ -37,6 +37,11 @@ async function addDealer(formData: FormData) {
   await supabase.from("dealers").insert({
     name,
     region: String(formData.get("region") || ""),
+    addr: String(formData.get("addr") || ""),
+    tel: String(formData.get("tel") || ""),
+    fax: String(formData.get("fax") || ""),
+    email: String(formData.get("email") || ""),
+    note: String(formData.get("note") || ""),
     contacts: parseJson(formData.get("contacts")),
   });
   revalidatePath("/dealers");
@@ -218,6 +223,21 @@ export default async function DealersPage() {
                         ))}
                       </div>
                     )}
+                    {(d.addr || d.tel || d.fax || d.email) && (
+                      <div className="text-[11.5px] text-ink-3 mt-1.5 leading-relaxed">
+                        {d.addr && <div>{d.addr}</div>}
+                        <div className="flex flex-wrap gap-x-3">
+                          {d.tel && <span>Tel {d.tel}</span>}
+                          {d.fax && <span>Fax {d.fax}</span>}
+                          {d.email && <span>{d.email}</span>}
+                        </div>
+                      </div>
+                    )}
+                    {d.note && (
+                      <div className="text-[11.5px] text-accent-ink mt-1">
+                        {d.note}
+                      </div>
+                    )}
                   </div>
                   <a
                     href={`/dealers/registry/${d.id}/edit`}
@@ -250,8 +270,30 @@ export default async function DealersPage() {
               </div>
             </div>
             <div>
+              <label className={labelCls}>주소</label>
+              <input name="addr" className={inputCls} placeholder="시/도 시군구 도로명" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className={labelCls}>대표번호</label>
+                <input name="tel" className={inputCls} placeholder="053-000-0000" />
+              </div>
+              <div>
+                <label className={labelCls}>팩스</label>
+                <input name="fax" className={inputCls} />
+              </div>
+            </div>
+            <div>
+              <label className={labelCls}>이메일</label>
+              <input name="email" className={inputCls} placeholder="name@company.com" />
+            </div>
+            <div>
               <label className={labelCls}>담당자 (여러 명)</label>
               <PeopleEditor name="contacts" />
+            </div>
+            <div>
+              <label className={labelCls}>메모 (담당 병원 등)</label>
+              <input name="note" className={inputCls} placeholder="담당: ○○병원" />
             </div>
             <button
               type="submit"
