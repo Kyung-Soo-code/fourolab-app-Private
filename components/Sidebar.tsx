@@ -80,12 +80,17 @@ export default function Sidebar({
         <div className="w-8 h-8 rounded-full bg-accent-bg text-accent-ink grid place-items-center text-[12px] font-bold">
           {userName.slice(0, 2)}
         </div>
-        <div className="min-w-0 flex-1">
-          <div className="text-[12.5px] font-semibold truncate">{userName}</div>
-        </div>
+        <Link href="/account" className="min-w-0 flex-1 group">
+          <div className="text-[12.5px] font-semibold truncate group-hover:text-accent">
+            {userName}
+          </div>
+          <div className="text-[10.5px] text-ink-3 group-hover:text-accent">
+            내 계정 · 비밀번호
+          </div>
+        </Link>
         <button
           onClick={logout}
-          className="text-[12px] text-ink-3 hover:text-ink underline"
+          className="text-[12px] text-ink-3 hover:text-ink underline shrink-0"
         >
           로그아웃
         </button>

@@ -57,7 +57,8 @@ export async function updateSession(request: NextRequest) {
     if (
       isDealer &&
       !path.startsWith("/aftercare") &&
-      !path.startsWith("/help")
+      !path.startsWith("/help") &&
+      !path.startsWith("/account")
     ) {
       const url = request.nextUrl.clone();
       url.pathname = "/aftercare";

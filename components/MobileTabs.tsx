@@ -25,6 +25,7 @@ const ALL = [
   { href: "/schedule", label: "전시·일정" },
   { href: "/audit", label: "수정 이력" },
   { href: "/help", label: "사용 안내" },
+  { href: "/account", label: "내 계정" },
 ];
 
 export default function MobileTabs({ role = "staff" }: { role?: string }) {
