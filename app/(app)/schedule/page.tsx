@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import OutItemsEditor from "@/components/OutItemsEditor";
@@ -161,7 +162,12 @@ async function deleteLeave(formData: FormData) {
   revalidatePath("/schedule");
 }
 
-export default async function SchedulePage() {
+export default async function SchedulePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ ym?: string }>;
+}) {
+  const sp = await searchParams;
   const supabase = await createClient();
   const [{ data: evRaw }, { data: lvRaw }, { data: devRaw }] = await Promise.all([
     supabase.from("events").select("*").order("event_date", { nullsFirst: false }),
@@ -195,10 +201,18 @@ export default async function SchedulePage() {
     { model: "OS1", kind: "전시용" },
   ];
 
-  // 월간 캘린더 (이번 달)
+  // 월간 캘린더 (ym=YYYY-MM 으로 이동, 없으면 이번 달)
   const today = new Date();
-  const year = today.getFullYear();
-  const month = today.getMonth();
+  const ymParam = sp.ym ?? "";
+  const m0 = ymParam.match(/^(\d{4})-(\d{1,2})$/);
+  const year = m0 ? parseInt(m0[1], 10) : today.getFullYear();
+  const month = m0 ? parseInt(m0[2], 10) - 1 : today.getMonth();
+  const prev = new Date(year, month - 1, 1);
+  const next = new Date(year, month + 1, 1);
+  const ymOf = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+  const isThisMonth =
+    year === today.getFullYear() && month === today.getMonth();
   const firstDow = new Date(year, month, 1).getDay();
   const daysIn = new Date(year, month + 1, 0).getDate();
   const pad2 = (x: number) => String(x).padStart(2, "0");
@@ -275,11 +289,35 @@ export default async function SchedulePage() {
 
       {/* 월간 캘린더 */}
       <div className="bg-surface border border-line rounded-xl p-4 mb-5">
-        <div className="flex items-center gap-2 mb-3">
+        <div className="flex items-center gap-2 mb-3 flex-wrap">
           <h2 className="font-bold text-[14px]">{monthLabel}</h2>
-          <span className="text-[12px] text-ink-3">
+          <span className="text-[12px] text-ink-3 hidden sm:inline">
             전시 · 설치 · 정기점검 · A/S · 데모
           </span>
+          <div className="ml-auto flex items-center gap-1.5">
+            {!isThisMonth && (
+              <Link
+                href="/schedule"
+                className="h-8 px-3 grid place-items-center rounded-lg border border-line text-[12px] font-semibold text-ink-2 hover:bg-surface-2"
+              >
+                오늘
+              </Link>
+            )}
+            <Link
+              href={`/schedule?ym=${ymOf(prev)}`}
+              aria-label="이전 달"
+              className="w-8 h-8 grid place-items-center rounded-lg border border-line text-ink-2 hover:bg-surface-2 text-[15px]"
+            >
+              ‹
+            </Link>
+            <Link
+              href={`/schedule?ym=${ymOf(next)}`}
+              aria-label="다음 달"
+              className="w-8 h-8 grid place-items-center rounded-lg border border-line text-ink-2 hover:bg-surface-2 text-[15px]"
+            >
+              ›
+            </Link>
+          </div>
         </div>
         <div className="grid grid-cols-7 gap-1.5">
           {["일", "월", "화", "수", "목", "금", "토"].map((w) => (
@@ -290,15 +328,27 @@ export default async function SchedulePage() {
               {w}
             </div>
           ))}
-          {dayCells.map((c, i) =>
-            c.day === null ? (
+          {dayCells.map((c, i) => {
+            const isToday =
+              c.day !== null && isThisMonth && c.day === today.getDate();
+            return c.day === null ? (
               <div key={i} />
             ) : (
               <div
                 key={i}
-                className="min-h-[64px] rounded-lg bg-surface-2 p-1.5 flex flex-col gap-1"
+                className={
+                  "min-h-[64px] rounded-lg p-1.5 flex flex-col gap-1 " +
+                  (isToday
+                    ? "bg-accent-bg ring-1 ring-accent"
+                    : "bg-surface-2")
+                }
               >
-                <span className="text-[11px] font-semibold text-ink-2">
+                <span
+                  className={
+                    "text-[11px] font-semibold " +
+                    (isToday ? "text-accent-ink" : "text-ink-2")
+                  }
+                >
                   {c.day}
                 </span>
                 {c.evs.slice(0, 3).map((e) => (
@@ -319,8 +369,8 @@ export default async function SchedulePage() {
                   </span>
                 )}
               </div>
-            ),
-          )}
+            );
+          })}
         </div>
       </div>
 
