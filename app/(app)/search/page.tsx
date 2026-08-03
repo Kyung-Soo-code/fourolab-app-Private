@@ -140,7 +140,7 @@ export default async function SearchPage({
             {tickets.map((t) => (
               <Link
                 key={t.id}
-                href={`/as/${t.id}/edit`}
+                href={`/as/${t.id}`}
                 className="px-4 py-3 flex items-center gap-3 flex-wrap hover:bg-surface-2"
               >
                 <span className="font-mono text-[12px] font-semibold">

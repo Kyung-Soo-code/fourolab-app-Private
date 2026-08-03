@@ -186,14 +186,26 @@ export default async function AsPage() {
                 {(tickets ?? []).map((t) => (
                   <tr key={t.id} className="border-t border-line-2 align-top">
                     <td className="px-3 py-3 font-mono text-[12px] font-semibold">
-                      {t.serial || "-"}
+                      <a
+                        href={`/as/${t.id}`}
+                        className="hover:text-accent hover:underline"
+                        title="상세 보기"
+                      >
+                        {t.serial || "-"}
+                      </a>
                     </td>
                     <td className="px-3 py-3 text-ink-3 text-[12px] whitespace-nowrap">
                       {fmt(t.received_at)}
                     </td>
                     <td className="px-3 py-3 text-ink-2">
-                      {t.hospital_name}
-                      <div className="text-[11.5px] text-ink-3">{t.symptom}</div>
+                      <a
+                        href={`/as/${t.id}`}
+                        className="hover:text-accent hover:underline"
+                        title="상세 보기"
+                      >
+                        {t.hospital_name}
+                        <div className="text-[11.5px] text-ink-3">{t.symptom}</div>
+                      </a>
                       {t.repair_by && t.repair_by !== "본사" && (
                         <span className="inline-block text-[10.5px] font-semibold px-1.5 py-0.5 rounded bg-[color:var(--info-bg)] text-[color:var(--info-ink)] mt-0.5">
                           수리: {t.repair_by}
@@ -229,6 +241,12 @@ export default async function AsPage() {
                     </td>
                     <td className="px-3 py-3 text-right whitespace-nowrap">
                       <div className="inline-flex items-center gap-1.5">
+                        <a
+                          href={`/as/${t.id}`}
+                          className="text-[12px] font-semibold px-2 py-1 rounded-md border border-line hover:bg-surface-2"
+                        >
+                          보기
+                        </a>
                         <a
                           href={`/as/${t.id}/edit`}
                           className="text-[12px] font-semibold text-accent hover:underline px-1.5"

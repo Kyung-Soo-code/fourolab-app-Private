@@ -266,7 +266,13 @@ export default async function HospitalDetail({
               {(tickets ?? []).map((t) => (
                 <tr key={t.id} className="border-t border-line-2 align-top">
                   <td className="px-4 py-3 font-mono text-[12px] font-semibold">
-                    {t.serial}
+                    <a
+                      href={`/as/${t.id}`}
+                      className="hover:text-accent hover:underline"
+                      title="A/S 상세 보기"
+                    >
+                      {t.serial}
+                    </a>
                   </td>
                   <td className="px-4 py-3 text-ink-2">
                     {t.symptom}

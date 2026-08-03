@@ -277,7 +277,12 @@ export default async function Dashboard() {
                 {recent.map((t) => (
                   <tr key={t.id} className="border-t border-line-2">
                     <td className="px-4 py-3 font-mono text-[12.5px] font-semibold">
-                      {t.serial}
+                      <Link
+                        href={`/as/${t.id}`}
+                        className="hover:text-accent hover:underline"
+                      >
+                        {t.serial}
+                      </Link>
                     </td>
                     <td className="px-4 py-3 text-ink-2">
                       {t.hospital_name}
