@@ -4,6 +4,7 @@ import { logAudit } from "@/lib/audit";
 import PartPicker from "@/components/PartPicker";
 import PeopleEditor from "@/components/PeopleEditor";
 import PhotoUpload from "@/components/PhotoUpload";
+import ResetForm from "@/components/ResetForm";
 
 export const dynamic = "force-dynamic";
 
@@ -264,7 +265,7 @@ export default async function AsPage() {
         {/* 접수 등록 폼 */}
         <div className="bg-surface border border-line rounded-xl p-4 h-fit">
           <h2 className="font-bold text-[14px] mb-3">A/S 접수 등록</h2>
-          <form action={createTicket} className="flex flex-col gap-3">
+          <ResetForm action={createTicket} className="flex flex-col gap-3">
             <div>
               <label className={labelCls}>대상 기기</label>
               <select name="device_id" className={inputCls} required>
@@ -403,7 +404,7 @@ export default async function AsPage() {
             >
               A/S 접수 등록
             </button>
-          </form>
+          </ResetForm>
         </div>
       </div>
     </div>

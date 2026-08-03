@@ -46,6 +46,7 @@ export default function PartPicker({
   defaultValue?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const [q, setQ] = useState("");
   const [sel, setSel] = useState<Sel[]>(() => parseDefault(defaultValue, parts));
   const boxRef = useRef<HTMLDivElement>(null);
 
@@ -61,11 +62,20 @@ export default function PartPicker({
   const text = sel.map((s) => `${s.name} ×${s.qty}`).join(", ");
   const itemsJson = JSON.stringify(sel.map((s) => ({ id: s.id, qty: s.qty })));
 
-  const sorted = [...parts].sort(
-    (a, b) =>
-      (b.favorite ? 1 : 0) - (a.favorite ? 1 : 0) ||
-      a.name.localeCompare(b.name, "ko"),
-  );
+  const kw = q.trim().toLowerCase();
+  const sorted = [...parts]
+    .filter((p) =>
+      kw === ""
+        ? true
+        : [p.name, p.note, p.category, p.as_type]
+            .filter(Boolean)
+            .some((t) => String(t).toLowerCase().includes(kw)),
+    )
+    .sort(
+      (a, b) =>
+        (b.favorite ? 1 : 0) - (a.favorite ? 1 : 0) ||
+        a.name.localeCompare(b.name, "ko"),
+    );
 
   function selOf(id: string) {
     return sel.find((x) => x.id === id);
@@ -109,10 +119,22 @@ export default function PartPicker({
       </button>
 
       {open && (
-        <div className="absolute z-20 mt-1 w-full max-h-72 overflow-y-auto bg-surface border border-line rounded-xl shadow-lg p-1.5">
+        <div className="absolute z-20 mt-1 w-full bg-surface border border-line rounded-xl shadow-lg">
+          <div className="p-1.5 border-b border-line-2">
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="부품 검색 (이름·비고·분류)"
+              autoFocus
+              className="w-full h-9 px-2.5 rounded-lg border border-line bg-surface-2 text-[13px] outline-none focus:border-accent"
+            />
+          </div>
+          <div className="max-h-64 overflow-y-auto p-1.5">
           {sorted.length === 0 && (
             <div className="px-3 py-4 text-center text-ink-3 text-[12.5px]">
-              등록된 부품이 없습니다. (재고·생산 관리에서 추가)
+              {parts.length === 0
+                ? "등록된 부품이 없습니다. (재고·생산 관리에서 추가)"
+                : `"${q}" 검색 결과가 없습니다.`}
             </div>
           )}
           {sorted.map((p, i) => {
@@ -187,8 +209,12 @@ export default function PartPicker({
               </div>
             );
           })}
+          </div>
 
-          <div className="flex justify-end pt-1.5 mt-1 border-t border-line-2">
+          <div className="flex items-center justify-between px-2 py-1.5 border-t border-line-2">
+            <span className="text-[11px] text-ink-3">
+              {sel.length > 0 ? `${sel.length}종 선택됨` : `${sorted.length}종`}
+            </span>
             <button
               type="button"
               onClick={() => setOpen(false)}
