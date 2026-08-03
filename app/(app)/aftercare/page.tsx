@@ -225,10 +225,17 @@ export default async function AftercarePage() {
                     >
                       {r.type}
                     </span>
-                    <span className="text-[13px] font-semibold">{r.dealer}</span>
-                    <span className="text-[12px] text-ink-2">
-                      → {r.hospital}
-                    </span>
+                    <a
+                      href={`/aftercare/${r.id}`}
+                      className="text-[13px] font-semibold hover:text-accent hover:underline"
+                      title="상세 보기"
+                    >
+                      {r.dealer}
+                      <span className="text-[12px] font-normal text-ink-2">
+                        {" "}
+                        → {r.hospital}
+                      </span>
+                    </a>
                     {r.serial && (
                       <span className="font-mono text-[11.5px] text-ink-3">
                         {r.serial}
@@ -245,6 +252,12 @@ export default async function AftercarePage() {
                     <span className="ml-auto text-[11.5px] text-ink-3 tabular-nums">
                       {r.visit_date ?? "—"}
                     </span>
+                    <a
+                      href={`/aftercare/${r.id}`}
+                      className="text-[12px] font-semibold px-2 py-1 rounded-md border border-line hover:bg-surface-2"
+                    >
+                      보기
+                    </a>
                     <a
                       href={`/aftercare/${r.id}/edit`}
                       className="text-[12px] font-semibold text-accent hover:underline"
