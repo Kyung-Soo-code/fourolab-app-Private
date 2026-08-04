@@ -75,6 +75,9 @@ export default async function EditAsPage({
         priority: String(formData.get("priority") || "진행중"),
         repair_by: String(formData.get("repair_by") || "본사"),
         repair_dealer: String(formData.get("repair_dealer") || ""),
+        received_at: formData.get("received_at")
+          ? new Date(String(formData.get("received_at"))).toISOString()
+          : t?.received_at,
         visited_at: formData.get("visited_at")
           ? new Date(String(formData.get("visited_at"))).toISOString()
           : null,
@@ -179,7 +182,16 @@ export default async function EditAsPage({
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className={labelCls}>방문일시</label>
+            <label className={labelCls}>접수일시</label>
+            <input
+              name="received_at"
+              type="datetime-local"
+              defaultValue={toLocalInput(t.received_at)}
+              className={inputCls}
+            />
+          </div>
+          <div>
+            <label className={labelCls}>방문·처리일시 (실제 A/S 실행일)</label>
             <input
               name="visited_at"
               type="datetime-local"

@@ -80,6 +80,9 @@ async function createTicket(formData: FormData) {
     priority: String(formData.get("priority") || "진행중"),
     repair_by: String(formData.get("repair_by") || "본사"),
     repair_dealer: String(formData.get("repair_dealer") || ""),
+    received_at: formData.get("received_at")
+      ? new Date(String(formData.get("received_at"))).toISOString()
+      : new Date().toISOString(),
     visited_at: formData.get("visited_at")
       ? new Date(String(formData.get("visited_at"))).toISOString()
       : null,
@@ -176,7 +179,7 @@ export default async function AsPage() {
               <thead>
                 <tr className="text-ink-3 text-left">
                   <th className="font-semibold px-3 py-2.5">기기번호</th>
-                  <th className="font-semibold px-3 py-2.5">접수</th>
+                  <th className="font-semibold px-3 py-2.5">접수 / 처리</th>
                   <th className="font-semibold px-3 py-2.5">병원 / 증상</th>
                   <th className="font-semibold px-3 py-2.5">상태</th>
                   <th className="font-semibold px-3 py-2.5 text-right">관리</th>
@@ -194,8 +197,15 @@ export default async function AsPage() {
                         {t.serial || "-"}
                       </a>
                     </td>
-                    <td className="px-3 py-3 text-ink-3 text-[12px] whitespace-nowrap">
-                      {fmt(t.received_at)}
+                    <td className="px-3 py-3 text-[12px] whitespace-nowrap">
+                      <div className="text-ink-2">
+                        <span className="text-ink-3">접수</span>{" "}
+                        {fmt(t.received_at)}
+                      </div>
+                      <div className={t.visited_at ? "text-accent-ink" : "text-ink-3"}>
+                        <span className="text-ink-3">처리</span>{" "}
+                        {t.visited_at ? fmt(t.visited_at) : "미완료"}
+                      </div>
                     </td>
                     <td className="px-3 py-3 text-ink-2">
                       <a
@@ -352,13 +362,24 @@ export default async function AsPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className={labelCls}>방문일시</label>
+                <label className={labelCls}>접수일시 (비우면 지금 시각)</label>
+                <input
+                  name="received_at"
+                  type="datetime-local"
+                  className={inputCls}
+                />
+              </div>
+              <div>
+                <label className={labelCls}>방문·처리일시 (실제 A/S 실행일)</label>
                 <input
                   name="visited_at"
                   type="datetime-local"
                   className={inputCls}
                 />
               </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className={labelCls}>긴급도</label>
                 <select name="priority" className={inputCls} defaultValue="진행중">
